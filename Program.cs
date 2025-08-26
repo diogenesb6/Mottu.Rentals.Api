@@ -1,15 +1,26 @@
+using Microsoft.EntityFrameworkCore;
+using System;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Configuração do banco de dados
+//builder.Services.AddDbContext<AppDbContext>(options =>
+  //  options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Adicionar controllers
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+// Swagger / OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Registro de serviços e repositórios
+// builder.Services.AddScoped<IMotoRepository, MotoRepository>();
+// builder.Services.AddScoped<IEntregadorRepository, EntregadorRepository>();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure o pipeline HTTP
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

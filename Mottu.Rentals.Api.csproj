@@ -7,13 +7,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.8" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Folder Include="Configurations\" />
+		<Folder Include="Controllers\" />
 		<Folder Include="DTO\" />
-		<Folder Include="Entities\" />
 		<Folder Include="Events\" />
 		<Folder Include="Logs\" />
 		<Folder Include="Repositories\" />
