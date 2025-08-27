@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Mottu.Rentals.Api.Data;
 using Mottu.Rentals.Api.DTO;
-using Mottu.Rentals.Api.Entities;
+using Mottu.Rentals.Api.Services;
 
 namespace Mottu.Rentals.Api.Controllers
 {
@@ -11,7 +11,7 @@ namespace Mottu.Rentals.Api.Controllers
     public class EntregadorController : ControllerBase
     {
         private readonly AppDbContext _context;
-       private readonly IEntregadorService _service;
+       private readonly RiderService _service;
 
         public EntregadorController(AppDbContext context)
         {
