@@ -1,6 +1,7 @@
-﻿using Mottu.Rentals.Api.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using Mottu.Rentals.Api.Data;
+using Mottu.Rentals.Api.DTO;
 using Mottu.Rentals.Api.Entities;
-using Microsoft.EntityFrameworkCore;
 
 namespace Mottu.Rentals.Api.Services
 {
@@ -13,18 +14,18 @@ namespace Mottu.Rentals.Api.Services
             _context = context;
         }
 
-        public async Task<Rental> CreateRentalAsync(Guid bikeId, Guid riderId, int planDays)
+        public async Task<Rental> CreateRentalAsync(RentalCreateDto dto)
         {
-            var bike = await _context.Bikes.FindAsync(bikeId)
+            var bike = await _context.Bikes.FindAsync(dto.BikeId)
                 ?? throw new Exception("Bike not found.");
 
-            var rider = await _context.Riders.FindAsync(riderId)
+            var rider = await _context.Riders.FindAsync(dto.RiderId)
                 ?? throw new Exception("Rider not found.");
 
             if (!rider.LicenseType.Contains("A"))
                 throw new Exception("Only riders with category A license can rent.");
 
-            decimal dailyRate = planDays switch
+            decimal dailyRate = dto.PlanDays switch
             {
                 7 => 30m,
                 15 => 28m,
@@ -37,13 +38,13 @@ namespace Mottu.Rentals.Api.Services
             var rental = new Rental
             {
                 Id = Guid.NewGuid(),
-                BikeId = bikeId,
-                RiderId = riderId,
-                PlanDays = planDays,
+                BikeId = dto.BikeId,
+                RiderId = dto.RiderId,
+                PlanDays = dto.PlanDays,
                 DailyRate = dailyRate,
                 StartDate = DateTime.UtcNow.Date.AddDays(1),
-                ExpectedEndDate = DateTime.UtcNow.Date.AddDays(planDays),
-                ExpectedValue = planDays * dailyRate,
+                ExpectedEndDate = DateTime.UtcNow.Date.AddDays(dto.PlanDays),
+                ExpectedValue = dto.PlanDays * dailyRate,
                 IsActive = true
             };
 
@@ -53,7 +54,7 @@ namespace Mottu.Rentals.Api.Services
             return rental;
         }
 
-        public async Task<Rental> FinalizeRentalAsync(Guid rentalId, DateTime returnDate)
+        public async Task<Rental> FinalizeRentalAsync(Guid rentalId, RentalReturnDto dto)
         {
             var rental = await _context.Rentals.FindAsync(rentalId)
                 ?? throw new Exception("Rental not found.");
@@ -61,11 +62,38 @@ namespace Mottu.Rentals.Api.Services
             if (!rental.IsActive)
                 throw new Exception("Rental already finalized.");
 
-            rental.FinalValue = CalculateFinalValue(rental, returnDate);
+            rental.EndDate = dto.ReturnDate;
+            rental.FinalValue = CalculateFinalValue(rental, dto.ReturnDate);
             rental.IsActive = false;
 
             await _context.SaveChangesAsync();
             return rental;
+        }
+
+        public async Task<Rental?> GetRentalByIdAsync(Guid rentalId)
+        {
+            return await _context.Rentals
+                .Include(r => r.Bike)
+                .Include(r => r.Rider)
+                .FirstOrDefaultAsync(r => r.Id == rentalId);
+        }
+
+        public async Task<List<Rental>> ListRentalsAsync()
+        {
+            return await _context.Rentals
+                .Include(r => r.Bike)
+                .Include(r => r.Rider)
+                .ToListAsync();
+        }
+
+        public async Task<bool> CancelRentalAsync(Guid rentalId)
+        {
+            var rental = await _context.Rentals.FindAsync(rentalId);
+            if (rental == null || !rental.IsActive) return false;
+
+            rental.IsActive = false;
+            await _context.SaveChangesAsync();
+            return true;
         }
 
         private decimal CalculateFinalValue(Rental rental, DateTime returnDate)
@@ -93,5 +121,6 @@ namespace Mottu.Rentals.Api.Services
             return rental.ExpectedValue;
         }
     }
+
 
 }

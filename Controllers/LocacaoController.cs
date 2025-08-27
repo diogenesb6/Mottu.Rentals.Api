@@ -12,53 +12,53 @@ namespace Mottu.Rentals.Api.Controllers
     public class LocacaoController : ControllerBase
     {
         private readonly AppDbContext _context;
-        private RentalService _locacaoService;
+        private RentalService _rentalService;
 
         public LocacaoController(AppDbContext context)
         {
             _context = context;
+            _rentalService = new RentalService(_context);
         }
 
 
 
-            [HttpPost]
-            public async Task<ActionResult<LocacaoResponseDto>> CriarLocacao([FromBody] LocacaoCreateDto dto)
-            {
-                var result = await _locacaoService.CreateRentalAsync(dto);
-                return CreatedAtAction(nameof(ObterPorId), new { id = result.Id }, result);
-            }
-
-            [HttpGet("{id}")]
-            public async Task<ActionResult<LocacaoResponseDto>> ObterPorId(int id)
-            {
-                var locacao = await _locacaoService.GetHashCode(id);
-                if (locacao == null) return NotFound();
-                return Ok(locacao);
-            }
-
-  
-            [HttpGet]
-            public async Task<ActionResult<IEnumerable<LocacaoResponseDto>>> Listar()
-            {
-                var lista = await _locacaoService.ListarAsync();
-                return Ok(lista);
-            }
-
-     
-            [HttpPut("{id}/devolucao")]
-            public async Task<ActionResult<LocacaoResponseDto>> DevolverMoto(int id, [FromBody] LocacaoDevolucaoDto dto)
-            {
-                var result = await _locacaoService.DevolverMotoAsync(id, dto);
-                if (result == null) return NotFound();
-                return Ok(result);
-            }
-
-            [HttpDelete("{id}")]
-            public async Task<IActionResult> Cancelar(int id)
-            {
-                var sucesso = await _locacaoService.CancelarLocacaoAsync(id);
-                if (!sucesso) return BadRequest("Não foi possível cancelar a locação.");
-                return NoContent();
-            }
+        [HttpPost]
+        public async Task<ActionResult<RentalResponseDto>> CreateRental([FromBody] RentalCreateDto dto)
+        {
+            var result = await _rentalService.CreateRentalAsync(dto);
+            return CreatedAtAction(nameof(GetById), new { id = result.Id }, result);
         }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<RentalResponseDto>> GetById(Guid id)
+        {
+            var rental = await _rentalService.GetRentalByIdAsync(id);
+            if (rental == null) return NotFound();
+            return Ok(rental);
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<RentalResponseDto>>> List()
+        {
+            var rentals = await _rentalService.ListRentalsAsync();
+            return Ok(rentals);
+        }
+
+        [HttpPut("{id}/return")]
+        public async Task<ActionResult<RentalResponseDto>> ReturnBike(Guid id, [FromBody] RentalReturnDto dto)
+        {
+            var result = await _rentalService.FinalizeRentalAsync(id, dto);
+            if (result == null) return NotFound();
+            return Ok(result);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Cancel(Guid id)
+        {
+            var success = await _rentalService.CancelRentalAsync(id);
+            if (!success) return BadRequest("Unable to cancel rental.");
+            return NoContent();
+        }
+    }
 }
+

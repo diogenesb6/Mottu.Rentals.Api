@@ -11,7 +11,7 @@ namespace Mottu.Rentals.Api.Controllers
     public class EntregadorController : ControllerBase
     {
         private readonly AppDbContext _context;
-        private readonly IEntregadorService _service;
+       private readonly IEntregadorService _service;
 
         public EntregadorController(AppDbContext context)
         {
@@ -63,7 +63,7 @@ namespace Mottu.Rentals.Api.Controllers
         public async Task<string> UploadFotoAsync(IFormFile foto)
         {
             if (foto == null || foto.Length == 0)
-                return null;
+                return string.Empty;
 
             var ext = Path.GetExtension(foto.FileName).ToLower();
             if (ext != ".png" && ext != ".bmp")
@@ -77,7 +77,7 @@ namespace Mottu.Rentals.Api.Controllers
                 await foto.CopyToAsync(stream);
             }
 
-            return fileName; // ou URL se estiver S3/MinIO
+            return fileName;
         }
     }
 }
