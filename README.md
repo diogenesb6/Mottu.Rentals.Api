@@ -17,21 +17,21 @@ Permite cadastrar motos, entregadores, criar locações e aplicar regras de plan
 - [x] Criar entidades principais (Moto, Entregador, Locacao)
 
 ### 2️⃣ Módulo Motos
-- [ ] Criar DTOs de Moto (request/response)
-- [ ] Criar MotoController com CRUD completo
+- [x] Criar DTOs de Moto (request/response)
+- [x] Criar MotoController com CRUD completo
 - [ ] Validar unicidade da placa
-- [ ] Filtrar motos pela placa
-- [ ] Permitir atualizar apenas a placa
+- [x] Filtrar motos pela placa
+- [x] Permitir atualizar apenas a placa
 - [ ] Permitir remover moto somente se não houver locações
 - [ ] Gerar evento de moto cadastrada via mensageria
 - [ ] Criar consumidor que notifique motos 2024 e salve no banco
 
 ### 3️⃣ Módulo Entregadores
-- [ ] Criar DTOs de Entregador
-- [ ] Criar EntregadorController com CRUD
+- [x] Criar DTOs de Entregador
+- [x] Criar EntregadorController com CRUD
 - [ ] Validar unicidade de CNPJ e Número da CNH
-- [ ] Permitir upload de foto da CNH (png/bmp)
-- [ ] Salvar foto em storage (local ou S3/MinIO)
+- [x] Permitir upload de foto da CNH (png/bmp)
+- [x] Salvar foto em storage (local ou S3/MinIO)
 
 ### 4️⃣ Módulo Locações
 - [ ] Criar DTOs de Locação
