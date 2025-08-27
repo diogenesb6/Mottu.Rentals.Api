@@ -61,27 +61,66 @@ git clone https://github.com/seu-usuario/mottu-rentals.git
 
 
 
-MotorRetails/
+
+
+MottuRentals/
 │
-├─ MotorRetails.API/          --> Projeto principal da API
-│   ├─ Controllers/           --> Controllers REST
-│   │   └─ EntregadorController.cs
-│   ├─ DTOs/                  --> Data Transfer Objects
-│   │   └─ EntregadorCreateDto.cs
-│   ├─ Services/              --> Regras de negócio
-│   │   └─ EntregadorService.cs
-│   ├─ Repositories/          --> Acesso ao banco
-│   │   └─ EntregadorRepository.cs
-│   ├─ Storage/               --> Gerenciamento de arquivos
+├─ MottuRentals.API/                --> Projeto principal da API
+│   ├─ Controllers/                 --> Controllers REST
+│   │   ├─ MotoController.cs
+│   │   ├─ EntregadorController.cs
+│   │   └─ LocacaoController.cs
+│   ├─ DTOs/                        --> Data Transfer Objects
+│   │   ├─ MotoCreateDto.cs
+│   │   ├─ MotoResponseDto.cs
+│   │   ├─ EntregadorCreateDto.cs
+│   │   ├─ EntregadorResponseDto.cs
+│   │   ├─ LocacaoCreateDto.cs
+│   │   └─ LocacaoResponseDto.cs
+│   ├─ Services/                    --> Regras de negócio
+│   │   ├─ MotoService.cs
+│   │   ├─ EntregadorService.cs
+│   │   └─ LocacaoService.cs
+│   ├─ Repositories/                --> Acesso ao banco
+│   │   ├─ MotoRepository.cs
+│   │   ├─ EntregadorRepository.cs
+│   │   └─ LocacaoRepository.cs
+│   ├─ Storage/                     --> Gerenciamento de arquivos
 │   │   └─ FotoStorageService.cs
-│   ├─ Models/                --> Entidades do EF Core
-│   │   └─ Entregador.cs
-│   ├─ Data/                  --> DbContext
-│   │   └─ MotorRetailsContext.cs
-│   └─ Program.cs             --> Configuração da API
+│   ├─ Models/                      --> Entidades do EF Core
+│   │   ├─ Moto.cs
+│   │   ├─ Entregador.cs
+│   │   └─ Locacao.cs
+│   ├─ Data/                        --> DbContext
+│   │   └─ MottuRentalsContext.cs
+│   ├─ Events/                      --> Mensageria/Eventos
+│   │   ├─ MotoCadastradaEvent.cs
+│   │   └─ MotoCadastradaConsumer.cs
+│   ├─ Middleware/                  --> Tratamento global de erros
+│   │   └─ ExceptionMiddleware.cs
+│   ├─ appsettings.json             --> Configurações
+│   └─ Program.cs                   --> Configuração da API
 │
-├─ MotorRetails.Domain/       --> Entidades e regras de negócio (opcional, se usar DDD)
+├─ MottuRentals.Domain/             --> Entidades e regras de negócio (DDD)
+│   ├─ Moto.cs
+│   ├─ Entregador.cs
+│   └─ Locacao.cs
 │
-├─ MotorRetails.Infrastructure/ --> Implementações de Storage, Repositórios
+├─ MottuRentals.Infrastructure/     --> Implementações de Storage, Repositórios, Mensageria
+│   ├─ Storage/
+│   │   └─ LocalStorageService.cs
+│   ├─ Messaging/
+│   │   └─ MotoEventPublisher.cs
+│   └─ Repositories/
+│       ├─ MotoRepository.cs
+│       ├─ EntregadorRepository.cs
+│       └─ LocacaoRepository.cs
 │
-└─ MotorRetails.Tests/        --> Testes unitá
+├─ MottuRentals.Tests/              --> Testes unitários e integração
+│   ├─ MotoServiceTests.cs
+│   ├─ EntregadorServiceTests.cs
+│   └─ LocacaoServiceTests.cs
+│
+├─ docker-compose.yml               --> Orquestração de containers
+├─ Dockerfile                       --> Build da API
+└─ README.md                        --> Documentação do projeto
