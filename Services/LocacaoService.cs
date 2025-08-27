@@ -71,8 +71,8 @@ namespace Mottu.Rentals.Api.Services
 
             locacao.ValorFinal = CalcularValorFinal(locacao, dataDevolucao);
             locacao.Ativa = false;
-
             await _context.SaveChangesAsync();
+
             return locacao;
         }
 
