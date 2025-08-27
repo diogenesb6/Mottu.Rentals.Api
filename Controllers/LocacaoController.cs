@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Mottu.Rentals.Api.Data;
 using Mottu.Rentals.Api.DTO;
 using Mottu.Rentals.Api.Entities;
+using Mottu.Rentals.Api.Services;
 
 namespace Mottu.Rentals.Api.Controllers
 {
@@ -11,6 +12,7 @@ namespace Mottu.Rentals.Api.Controllers
     public class LocacaoController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private RentalService _locacaoService;
 
         public LocacaoController(AppDbContext context)
         {
@@ -22,14 +24,14 @@ namespace Mottu.Rentals.Api.Controllers
             [HttpPost]
             public async Task<ActionResult<LocacaoResponseDto>> CriarLocacao([FromBody] LocacaoCreateDto dto)
             {
-                var result = await _locacaoService.CriarLocacaoAsync(dto);
+                var result = await _locacaoService.CreateRentalAsync(dto);
                 return CreatedAtAction(nameof(ObterPorId), new { id = result.Id }, result);
             }
 
             [HttpGet("{id}")]
             public async Task<ActionResult<LocacaoResponseDto>> ObterPorId(int id)
             {
-                var locacao = await _locacaoService.ObterPorIdAsync(id);
+                var locacao = await _locacaoService.GetHashCode(id);
                 if (locacao == null) return NotFound();
                 return Ok(locacao);
             }

@@ -4,93 +4,94 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Mottu.Rentals.Api.Services
 {
-    public class LocacaoService
+    public class RentalService
     {
         private readonly AppDbContext _context;
 
-        public LocacaoService(AppDbContext context)
+        public RentalService(AppDbContext context)
         {
             _context = context;
         }
 
-        public async Task<Rental> CriarLocacaoAsync(Guid motoId, Guid entregadorId, int planoDias)
+        public async Task<Rental> CreateRentalAsync(Guid bikeId, Guid riderId, int planDays)
         {
-            var moto = await _context.Motos.FindAsync(motoId)
-                ?? throw new Exception("Moto não encontrada.");
+            var bike = await _context.Bikes.FindAsync(bikeId)
+                ?? throw new Exception("Bike not found.");
 
-            var entregador = await _context.Entregadores.FindAsync(entregadorId)
-                ?? throw new Exception("Entregador não encontrado.");
+            var rider = await _context.Riders.FindAsync(riderId)
+                ?? throw new Exception("Rider not found.");
 
-            if (!entregador.TipoCNH.Contains("A"))
-                throw new Exception("Somente entregadores com CNH categoria A podem alugar.");
+            if (!rider.LicenseType.Contains("A"))
+                throw new Exception("Only riders with category A license can rent.");
 
-            decimal valorDiaria = planoDias switch
+            decimal dailyRate = planDays switch
             {
                 7 => 30m,
                 15 => 28m,
                 30 => 22m,
                 45 => 20m,
                 50 => 18m,
-                _ => throw new Exception("Plano inválido.")
+                _ => throw new Exception("Invalid plan.")
             };
 
-            var locacao = new Rental
+            var rental = new Rental
             {
                 Id = Guid.NewGuid(),
-                MotoId = motoId,
-                EntregadorId = entregadorId,
-                PlanoDias = planoDias,
-                ValorDiaria = valorDiaria,
-                DataInicio = DateTime.UtcNow.Date.AddDays(1),
-                DataPrevistaTermino = DateTime.UtcNow.Date.AddDays(planoDias),
-                ValorPrevisto = planoDias * valorDiaria,
-                Ativa = true
+                BikeId = bikeId,
+                RiderId = riderId,
+                PlanDays = planDays,
+                DailyRate = dailyRate,
+                StartDate = DateTime.UtcNow.Date.AddDays(1),
+                ExpectedEndDate = DateTime.UtcNow.Date.AddDays(planDays),
+                ExpectedValue = planDays * dailyRate,
+                IsActive = true
             };
 
-            _context.Locacoes.Add(locacao);
+            _context.Rentals.Add(rental);
             await _context.SaveChangesAsync();
 
-            return locacao;
+            return rental;
         }
 
-        public async Task<Rental> FinalizarLocacaoAsync(Guid locacaoId, DateTime dataDevolucao)
+        public async Task<Rental> FinalizeRentalAsync(Guid rentalId, DateTime returnDate)
         {
-            var locacao = await _context.Locacoes.FindAsync(locacaoId)
-                ?? throw new Exception("Locação não encontrada.");
+            var rental = await _context.Rentals.FindAsync(rentalId)
+                ?? throw new Exception("Rental not found.");
 
-            if (!locacao.Ativa)
-                throw new Exception("Locação já finalizada.");
+            if (!rental.IsActive)
+                throw new Exception("Rental already finalized.");
 
-            locacao.ValorFinal = CalcularValorFinal(locacao, dataDevolucao);
-            locacao.Ativa = false;
+            rental.FinalValue = CalculateFinalValue(rental, returnDate);
+            rental.IsActive = false;
 
             await _context.SaveChangesAsync();
-            return locacao;
+            return rental;
         }
 
-        private decimal CalcularValorFinal(Rental locacao, DateTime dataDevolucao)
+        private decimal CalculateFinalValue(Rental rental, DateTime returnDate)
         {
-            if (dataDevolucao < locacao.DataPrevistaTermino)
+            if (returnDate < rental.ExpectedEndDate)
             {
-                int diasUsados = Math.Max((dataDevolucao - locacao.DataInicio).Days, 1);
-                int diasNaoUsados = locacao.PlanoDias - diasUsados;
-                decimal valorBase = diasUsados * locacao.ValorDiaria;
-                decimal multa = locacao.PlanoDias switch
+                int daysUsed = Math.Max((returnDate - rental.StartDate).Days, 1);
+                int unusedDays = rental.PlanDays - daysUsed;
+                decimal baseValue = daysUsed * rental.DailyRate;
+                decimal penalty = rental.PlanDays switch
                 {
-                    7 => diasNaoUsados * locacao.ValorDiaria * 0.20m,
-                    15 => diasNaoUsados * locacao.ValorDiaria * 0.40m,
+                    7 => unusedDays * rental.DailyRate * 0.20m,
+                    15 => unusedDays * rental.DailyRate * 0.40m,
                     _ => 0m
                 };
-                return valorBase + multa;
+                return baseValue + penalty;
             }
 
-            if (dataDevolucao > locacao.DataPrevistaTermino)
+            if (returnDate > rental.ExpectedEndDate)
             {
-                int diasAtraso = (dataDevolucao - locacao.DataPrevistaTermino).Days;
-                return locacao.ValorPrevisto + (diasAtraso * 50m);
+                int lateDays = (returnDate - rental.ExpectedEndDate).Days;
+                return rental.ExpectedValue + (lateDays * 50m);
             }
 
-            return locacao.ValorPrevisto;
+            return rental.ExpectedValue;
         }
     }
+
 }
