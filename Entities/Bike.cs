@@ -1,12 +1,21 @@
-﻿namespace Mottu.Rentals.Api.Entities
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Mottu.Rentals.Api.Entities
 {
     public class Bike
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
-        public int Year { get; set; }
-        public string Model { get; set; } = string.Empty;
-        public string Plate { get; set; } = string.Empty;
+        [Key]
+        public Guid Id { get; set; }
 
-        public bool HasActiveRental { get; set; } = false;
+        [Required]
+        public int Year { get; set; }
+
+        [Required]
+        [MaxLength(100)]
+        public string Model { get; set; } = null!;
+
+        [Required]
+        [MaxLength(10)]
+        public string Plate { get; set; } = null!; 
     }
 }
