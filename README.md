@@ -124,3 +124,145 @@ MottuRentals/
 ├─ docker-compose.yml               --> Orquestração de containers
 ├─ Dockerfile                       --> Build da API
 └─ README.md                        --> Documentação do projeto
+
+
+
+
+📖 Casos de Uso – MottuRentals
+👨‍💼 Usuário Admin
+1. Cadastrar Moto
+
+Como admin
+
+Quero cadastrar uma nova moto
+
+Para disponibilizá-la para locação
+
+Regras de negócio:
+
+Dados obrigatórios: Identificador, Ano, Modelo, Placa.
+
+Placa deve ser única (não pode repetir).
+
+Ao cadastrar, gerar evento de MotoCadastrada.
+
+O evento deve ser publicado em um sistema de mensageria.
+
+Criar consumidor para eventos: se Ano == 2024, salvar notificação no banco de dados para consulta futura.
+
+2. Consultar Motos
+
+Como admin
+
+Quero consultar as motos cadastradas
+
+Para gerenciar os veículos disponíveis
+
+Regras:
+
+Permitir listagem completa.
+
+Permitir filtro por placa.
+
+3. Alterar Placa da Moto
+
+Como admin
+
+Quero alterar a placa de uma moto cadastrada incorretamente
+
+Regras:
+
+Apenas o campo placa pode ser alterado.
+
+Validar unicidade da nova placa.
+
+4. Remover Moto
+
+Como admin
+
+Quero remover uma moto cadastrada incorretamente
+
+Regras:
+
+Só pode remover se não houver registro de locações vinculadas.
+
+🏍️ Usuário Entregador
+5. Cadastro de Entregador
+
+Como entregador
+
+Quero me cadastrar na plataforma
+
+Para poder alugar motos
+
+Regras:
+
+Dados obrigatórios: Identificador, Nome, CNPJ, Data de Nascimento, Número da CNH, Tipo da CNH, Imagem CNH.
+
+Tipos de CNH válidos: A, B ou A+B.
+
+CNPJ deve ser único.
+
+Número da CNH deve ser único.
+
+Foto da CNH deve ser enviada em formato PNG ou BMP.
+
+Foto não pode ser armazenada no banco → salvar em Storage (local, S3, MinIO etc.).
+
+6. Atualizar Foto da CNH
+
+Como entregador
+
+Quero enviar uma nova foto da CNH
+
+Regras:
+
+Formato permitido: PNG ou BMP.
+
+Deve sobrescrever a imagem anterior no storage.
+
+7. Alugar Moto
+
+Como entregador
+
+Quero alugar uma moto por um período
+
+Regras:
+
+Apenas entregadores com CNH categoria A podem alugar.
+
+Planos disponíveis:
+
+7 dias → R$ 30/dia
+
+15 dias → R$ 28/dia
+
+30 dias → R$ 22/dia
+
+45 dias → R$ 20/dia
+
+50 dias → R$ 18/dia
+
+Datas obrigatórias: Data de Início, Data Prevista de Término.
+
+Data de Início = primeiro dia após a criação da locação.
+
+8. Devolver Moto
+
+Como entregador
+
+Quero informar a data de devolução da moto
+
+Para calcular o valor total da locação
+
+Regras:
+
+Se devolver antes do previsto → cobrar diárias + multa sobre diárias não utilizadas:
+
+Plano 7 dias → multa 20%
+
+Plano 15 dias → multa 40%
+
+Se devolver após o previsto → cobrar R$ 50,00 por diária adicional.
+
+Valor final = diárias + multa/extra (se aplicável).
