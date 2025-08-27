@@ -47,6 +47,8 @@ namespace Mottu.Rentals.Api.Controllers
             await _context.SaveChangesAsync();
 
 
+            // Publica evento no RabbitMQ
+            /*
             try
             {
                 var factory = new ConnectionFactory()
@@ -90,7 +92,7 @@ namespace Mottu.Rentals.Api.Controllers
             {
 
                 return BadRequest(new { message ="Erro ao publicar evento no RabbitMQ" });
-            }
+            }*/
 
 
             var response = new MotoResponseDto
