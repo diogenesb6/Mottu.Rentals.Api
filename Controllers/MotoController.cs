@@ -16,26 +16,34 @@ namespace Mottu.Rentals.Api.Controllers
             _context = context;
         }
 
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Moto>>> GetAll()
+        [HttpPost]
+        public async Task<IActionResult> CreateMoto([FromBody] Moto moto)
         {
-            return await _context.Motos.ToListAsync();
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            // Verifica se já existe moto com mesma placa
+            var exists = _context.Motos.Any(m => m.Plate == moto.Plate);
+            if (exists)
+                return Conflict(new { message = "Já existe uma moto com essa placa." });
+
+            _context.Motos.Add(moto);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetMotoById), new { id = moto.Id }, moto);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Moto>> GetById(Guid id)
+        public async Task<IActionResult> GetMotoById(string? plate)
         {
-            var moto = await _context.Motos.FindAsync(id);
-            if (moto == null) return NotFound();
-            return moto;
-        }
+            var motos = _context.Motos.AsQueryable();
 
-        [HttpPost]
-        public async Task<ActionResult<Moto>> Create(Moto moto)
-        {
-            _context.Motos.Add(moto);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetById), new { id = moto.Id }, moto);
+            if (!string.IsNullOrEmpty(plate))
+            {
+                motos = motos.Where(m => m.Plate.Contains(plate));
+            }
+
+            return Ok(motos.ToList());
         }
 
         [HttpPut("{id}")]
