@@ -2,9 +2,11 @@
 {
     public class Moto
     {
-        public Guid Id { get; set; }
-        public string Modelo { get; set; } = null!;
-        public int Ano { get; set; }
-        public string Placa { get; set; } = null!;
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public int Year { get; set; }
+        public string Model { get; set; } = string.Empty;
+        public string Plate { get; set; } = string.Empty;
+
+        public bool HasActiveRental { get; set; } = false;
     }
 }

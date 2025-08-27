@@ -18,31 +18,25 @@ namespace Mottu.Rentals.Api.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configurações de unicidade
-            modelBuilder.Entity<Moto>()
-                .HasIndex(m => m.Placa)
-                .IsUnique();
+            // Configuração da tabela de motos
+            modelBuilder.Entity<Moto>(entity =>
+            {
+                entity.HasKey(m => m.Id);
 
-            modelBuilder.Entity<Entregador>()
-                .HasIndex(e => e.CNPJ)
-                .IsUnique();
+                entity.Property(m => m.Year)
+                      .IsRequired();
 
-            modelBuilder.Entity<Entregador>()
-                .HasIndex(e => e.NumeroCNH)
-                .IsUnique();
+                entity.Property(m => m.Model)
+                      .IsRequired()
+                      .HasMaxLength(100);
 
-            // Relacionamentos
-            modelBuilder.Entity<Locacao>()
-                .HasOne<Moto>()
-                .WithMany()
-                .HasForeignKey(l => l.MotoId)
-                .OnDelete(DeleteBehavior.Restrict);
+                entity.Property(m => m.Plate)
+                      .IsRequired()
+                      .HasMaxLength(10);
 
-            modelBuilder.Entity<Locacao>()
-                .HasOne<Entregador>()
-                .WithMany()
-                .HasForeignKey(l => l.EntregadorId)
-                .OnDelete(DeleteBehavior.Restrict);
+                // Placa é única
+                entity.HasIndex(m => m.Plate).IsUnique();
+            });
         }
     }
 }
