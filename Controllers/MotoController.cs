@@ -17,7 +17,7 @@ namespace Mottu.Rentals.Api.Controllers
     public class MotoController : ControllerBase
     {
         private readonly AppDbContext _context;
-        private static List<Moto> _motos = new();
+        private static List<Bike> _motos = new();
 
 
         public MotoController(AppDbContext context)
@@ -36,7 +36,7 @@ namespace Mottu.Rentals.Api.Controllers
             if (exists)
                 return Conflict(new { message = "Já existe uma moto com essa placa." });
 
-            var moto = new Moto
+            var moto = new Bike
             {
                 Year = dto.Year,
                 Model = dto.Model,

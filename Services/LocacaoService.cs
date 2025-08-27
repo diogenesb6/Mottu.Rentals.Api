@@ -13,7 +13,7 @@ namespace Mottu.Rentals.Api.Services
             _context = context;
         }
 
-        public async Task<Locacao> CriarLocacaoAsync(Guid motoId, Guid entregadorId, int planoDias)
+        public async Task<Rental> CriarLocacaoAsync(Guid motoId, Guid entregadorId, int planoDias)
         {
             var moto = await _context.Motos.FindAsync(motoId)
                 ?? throw new Exception("Moto não encontrada.");
@@ -34,7 +34,7 @@ namespace Mottu.Rentals.Api.Services
                 _ => throw new Exception("Plano inválido.")
             };
 
-            var locacao = new Locacao
+            var locacao = new Rental
             {
                 Id = Guid.NewGuid(),
                 MotoId = motoId,
@@ -53,7 +53,7 @@ namespace Mottu.Rentals.Api.Services
             return locacao;
         }
 
-        public async Task<Locacao> FinalizarLocacaoAsync(Guid locacaoId, DateTime dataDevolucao)
+        public async Task<Rental> FinalizarLocacaoAsync(Guid locacaoId, DateTime dataDevolucao)
         {
             var locacao = await _context.Locacoes.FindAsync(locacaoId)
                 ?? throw new Exception("Locação não encontrada.");
@@ -68,7 +68,7 @@ namespace Mottu.Rentals.Api.Services
             return locacao;
         }
 
-        private decimal CalcularValorFinal(Locacao locacao, DateTime dataDevolucao)
+        private decimal CalcularValorFinal(Rental locacao, DateTime dataDevolucao)
         {
             if (dataDevolucao < locacao.DataPrevistaTermino)
             {

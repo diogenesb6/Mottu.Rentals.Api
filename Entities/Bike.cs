@@ -1,6 +1,6 @@
 ﻿namespace Mottu.Rentals.Api.Entities
 {
-    public class Moto
+    public class Bike
     {
         public Guid Id { get; set; } = Guid.NewGuid();
         public int Year { get; set; }
