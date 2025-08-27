@@ -58,3 +58,30 @@ Permite cadastrar motos, entregadores, criar locações e aplicar regras de plan
 1. Clone o repositório:
 ```bash
 git clone https://github.com/seu-usuario/mottu-rentals.git
+
+
+
+MotorRetails/
+│
+├─ MotorRetails.API/          --> Projeto principal da API
+│   ├─ Controllers/           --> Controllers REST
+│   │   └─ EntregadorController.cs
+│   ├─ DTOs/                  --> Data Transfer Objects
+│   │   └─ EntregadorCreateDto.cs
+│   ├─ Services/              --> Regras de negócio
+│   │   └─ EntregadorService.cs
+│   ├─ Repositories/          --> Acesso ao banco
+│   │   └─ EntregadorRepository.cs
+│   ├─ Storage/               --> Gerenciamento de arquivos
+│   │   └─ FotoStorageService.cs
+│   ├─ Models/                --> Entidades do EF Core
+│   │   └─ Entregador.cs
+│   ├─ Data/                  --> DbContext
+│   │   └─ MotorRetailsContext.cs
+│   └─ Program.cs             --> Configuração da API
+│
+├─ MotorRetails.Domain/       --> Entidades e regras de negócio (opcional, se usar DDD)
+│
+├─ MotorRetails.Infrastructure/ --> Implementações de Storage, Repositórios
+│
+└─ MotorRetails.Tests/        --> Testes unitá
