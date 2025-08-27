@@ -3,6 +3,12 @@ using Microsoft.EntityFrameworkCore;
 using Mottu.Rentals.Api.Data;
 using Mottu.Rentals.Api.DTO;
 using Mottu.Rentals.Api.Entities;
+using Mottu.Rentals.Api.Events;
+using RabbitMQ.Client;
+using System.Text;
+using System.Text.Json;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+//using Mottu.Rentals.Api.Events;
 
 namespace Mottu.Rentals.Api.Controllers
 {
@@ -39,6 +45,53 @@ namespace Mottu.Rentals.Api.Controllers
 
             _context.Motos.Add(moto);
             await _context.SaveChangesAsync();
+
+
+            try
+            {
+                var factory = new ConnectionFactory()
+                {
+                    HostName = "localhost",
+                    Port = 5672, // Porta explícita
+                    UserName = "guest", // Credenciais padrão
+                    Password = "guest",
+                   // DispatchConsumersAsync = true
+                };
+
+                using var connection = factory.CreateConnectionAsync();
+                using var channel =  connection.;
+
+                channel.QueueDeclare(
+                    queue: "MotoCadastrada",
+                    durable: false,
+                    exclusive: false,
+                    autoDelete: false,
+                    arguments: null
+                );
+
+                var evento = new MotoCadastradaEvent
+                {
+                    Id = moto.Id,
+                    Year = moto.Year,
+                    Model = moto.Model,
+                    Plate = moto.Plate
+                };
+
+                var body = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(evento));
+
+                channel.BasicPublish(
+                    exchange: "",
+                    routingKey: "MotoCadastrada",
+                    basicProperties: null,
+                    body: body
+                );
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(new { message ="Erro ao publicar evento no RabbitMQ" });
+            }
+
 
             var response = new MotoResponseDto
             {
