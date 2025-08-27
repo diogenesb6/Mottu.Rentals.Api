@@ -13,7 +13,6 @@
 
 	<ItemGroup>
 		<Folder Include="Configurations\" />
-		<Folder Include="DTO\" />
 		<Folder Include="Events\" />
 		<Folder Include="Logs\" />
 		<Folder Include="Repositories\" />

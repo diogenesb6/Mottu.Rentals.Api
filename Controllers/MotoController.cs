@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Mottu.Rentals.Api.Data;
+using Mottu.Rentals.Api.DTO;
 using Mottu.Rentals.Api.Entities;
 
 namespace Mottu.Rentals.Api.Controllers
@@ -10,6 +11,8 @@ namespace Mottu.Rentals.Api.Controllers
     public class MotoController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private static List<Moto> _motos = new();
+
 
         public MotoController(AppDbContext context)
         {
@@ -17,51 +20,124 @@ namespace Mottu.Rentals.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateMoto([FromBody] Moto moto)
+        public async Task<IActionResult> CreateMoto([FromBody] MotoRequestDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            // Verifica se já existe moto com mesma placa
-            var exists = _context.Motos.Any(m => m.Plate == moto.Plate);
+            // Verifica se já existe moto com a mesma placa
+            var exists = await _context.Motos.AnyAsync(m => m.Plate == dto.Plate);
             if (exists)
                 return Conflict(new { message = "Já existe uma moto com essa placa." });
+
+            var moto = new Moto
+            {
+                Year = dto.Year,
+                Model = dto.Model,
+                Plate = dto.Plate
+            };
 
             _context.Motos.Add(moto);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetMotoById), new { id = moto.Id }, moto);
+            var response = new MotoResponseDto
+            {
+                Id = moto.Id,
+                Year = moto.Year,
+                Model = moto.Model,
+                Plate = moto.Plate
+            };
+
+            return CreatedAtAction(nameof(GetMotoById), new { id = moto.Id }, response);
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetMotoById(string? plate)
+        [HttpGet]
+        public async Task<IActionResult> GetMotos([FromQuery] string? plate)
         {
-            var motos = _context.Motos.AsQueryable();
+            var query = _context.Motos.AsQueryable();
 
             if (!string.IsNullOrEmpty(plate))
-            {
-                motos = motos.Where(m => m.Plate.Contains(plate));
-            }
+                query = query.Where(m => m.Plate.Contains(plate));
 
-            return Ok(motos.ToList());
+            var motos = await query
+                .Select(m => new MotoResponseDto
+                {
+                    Id = m.Id,
+                    Year = m.Year,
+                    Model = m.Model,
+                    Plate = m.Plate
+                })
+                .ToListAsync();
+
+            return Ok(motos);
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, Moto moto)
-        {
-            if (id != moto.Id) return BadRequest();
-            _context.Entry(moto).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetMotoById(Guid id)
         {
             var moto = await _context.Motos.FindAsync(id);
-            if (moto == null) return NotFound();
+
+            if (moto == null)
+                return NotFound(new { message = "Moto não encontrada." });
+
+            var response = new MotoResponseDto
+            {
+                Id = moto.Id,
+                Year = moto.Year,
+                Model = moto.Model,
+                Plate = moto.Plate
+            };
+
+            return Ok(response);
+        }
+
+        // PUT: api/motos/{id}
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> UpdateMotoPlate(Guid id, [FromBody] string newPlate)
+        {
+            if (string.IsNullOrWhiteSpace(newPlate))
+                return BadRequest(new { message = "A placa não pode ser vazia." });
+
+            var moto = await _context.Motos.FindAsync(id);
+            if (moto == null)
+                return NotFound(new { message = "Moto não encontrada." });
+
+            // Verifica se já existe outra moto com a mesma placa
+            var exists = await _context.Motos.AnyAsync(m => m.Plate == newPlate && m.Id != id);
+            if (exists)
+                return Conflict(new { message = "Já existe outra moto com essa placa." });
+
+            moto.Plate = newPlate;
+            await _context.SaveChangesAsync();
+
+            var response = new MotoResponseDto
+            {
+                Id = moto.Id,
+                Year = moto.Year,
+                Model = moto.Model,
+                Plate = moto.Plate
+            };
+
+            return Ok(response);
+        }
+
+
+        // DELETE: api/motos/{id}
+        [HttpDelete("{id:guid}")]
+        public async Task<IActionResult> DeleteMoto(Guid id)
+        {
+            var moto = await _context.Motos.FindAsync(id);
+            if (moto == null)
+                return NotFound(new { message = "Moto não encontrada." });
+
+            // Verifica se existe locação ativa
+            if (moto.HasActiveRental)
+                return BadRequest(new { message = "Não é possível excluir uma moto com locações ativas." });
+
             _context.Motos.Remove(moto);
             await _context.SaveChangesAsync();
+
             return NoContent();
         }
     }
