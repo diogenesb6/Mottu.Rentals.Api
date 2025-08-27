@@ -15,20 +15,15 @@ namespace Mottu.Rentals.Api.Services
 
         public async Task<Locacao> CriarLocacaoAsync(Guid motoId, Guid entregadorId, int planoDias)
         {
-            // 1. Validar moto
-            var moto = await _context.Motos.FindAsync(motoId);
-            if (moto == null)
-                throw new Exception("Moto não encontrada.");
+            var moto = await _context.Motos.FindAsync(motoId)
+                ?? throw new Exception("Moto não encontrada.");
 
-            // 2. Validar entregador
-            var entregador = await _context.Entregadores.FindAsync(entregadorId);
-            if (entregador == null)
-                throw new Exception("Entregador não encontrado.");
+            var entregador = await _context.Entregadores.FindAsync(entregadorId)
+                ?? throw new Exception("Entregador não encontrado.");
 
             if (!entregador.TipoCNH.Contains("A"))
                 throw new Exception("Somente entregadores com CNH categoria A podem alugar.");
 
-            // 3. Determinar valor da diária pelo plano
             decimal valorDiaria = planoDias switch
             {
                 7 => 30m,
@@ -39,7 +34,6 @@ namespace Mottu.Rentals.Api.Services
                 _ => throw new Exception("Plano inválido.")
             };
 
-            // 4. Criar locação
             var locacao = new Locacao
             {
                 Id = Guid.NewGuid(),
@@ -47,7 +41,7 @@ namespace Mottu.Rentals.Api.Services
                 EntregadorId = entregadorId,
                 PlanoDias = planoDias,
                 ValorDiaria = valorDiaria,
-                DataInicio = DateTime.UtcNow.Date.AddDays(1), // início sempre no dia seguinte
+                DataInicio = DateTime.UtcNow.Date.AddDays(1),
                 DataPrevistaTermino = DateTime.UtcNow.Date.AddDays(planoDias),
                 ValorPrevisto = planoDias * valorDiaria,
                 Ativa = true
@@ -61,21 +55,18 @@ namespace Mottu.Rentals.Api.Services
 
         public async Task<Locacao> FinalizarLocacaoAsync(Guid locacaoId, DateTime dataDevolucao)
         {
-            var locacao = await _context.Locacoes.FindAsync(locacaoId);
-            if (locacao == null)
-                throw new Exception("Locação não encontrada.");
+            var locacao = await _context.Locacoes.FindAsync(locacaoId)
+                ?? throw new Exception("Locação não encontrada.");
 
             if (!locacao.Ativa)
                 throw new Exception("Locação já finalizada.");
 
-
             locacao.ValorFinal = CalcularValorFinal(locacao, dataDevolucao);
             locacao.Ativa = false;
-            await _context.SaveChangesAsync();
 
+            await _context.SaveChangesAsync();
             return locacao;
         }
-
 
         private decimal CalcularValorFinal(Locacao locacao, DateTime dataDevolucao)
         {
@@ -83,7 +74,6 @@ namespace Mottu.Rentals.Api.Services
             {
                 int diasUsados = Math.Max((dataDevolucao - locacao.DataInicio).Days, 1);
                 int diasNaoUsados = locacao.PlanoDias - diasUsados;
-
                 decimal valorBase = diasUsados * locacao.ValorDiaria;
                 decimal multa = locacao.PlanoDias switch
                 {
@@ -91,19 +81,16 @@ namespace Mottu.Rentals.Api.Services
                     15 => diasNaoUsados * locacao.ValorDiaria * 0.40m,
                     _ => 0m
                 };
-
                 return valorBase + multa;
             }
-            else if (dataDevolucao > locacao.DataPrevistaTermino)
+
+            if (dataDevolucao > locacao.DataPrevistaTermino)
             {
                 int diasAtraso = (dataDevolucao - locacao.DataPrevistaTermino).Days;
                 return locacao.ValorPrevisto + (diasAtraso * 50m);
             }
-            else
-            {
-                return locacao.ValorPrevisto;
-            }
 
+            return locacao.ValorPrevisto;
         }
     }
 }
