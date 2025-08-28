@@ -1,5 +1,7 @@
 ﻿using Mottu.Rentals.Api.Data;
 using Mottu.Rentals.Api.Entities;
+using Mottu.Rentals.Api.DTO;
+
 
 namespace Mottu.Rentals.Api.Services
 {

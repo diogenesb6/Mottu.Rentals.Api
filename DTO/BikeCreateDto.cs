@@ -2,7 +2,7 @@
 
 namespace Mottu.Rentals.Api.DTO
 {
-    public class MotoRequestDto
+    public class BikeCreateDto
     {
         [Required]
         public int Year { get; set; }

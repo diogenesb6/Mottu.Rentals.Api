@@ -1,4 +1,5 @@
 ﻿using Mottu.Rentals.Api.Data;
+using Mottu.Rentals.Api.DTO;
 using Mottu.Rentals.Api.Entities;
 
 namespace Mottu.Rentals.Api.Services
@@ -34,7 +35,8 @@ namespace Mottu.Rentals.Api.Services
 
         public async Task<List<Bike>> ListBikesAsync()
         {
-            return await _context.Bikes.ToListAsync();
+            //retorno async
+            return _context.Bikes.ToList();
         }
 
         public async Task<bool> DeleteBikeAsync(Guid id)

@@ -26,7 +26,7 @@ namespace Mottu.Rentals.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateMoto([FromBody] MotoRequestDto dto)
+        public async Task<IActionResult> CreateMoto([FromBody] BikeCreateDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

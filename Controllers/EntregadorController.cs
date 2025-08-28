@@ -34,7 +34,7 @@ namespace Mottu.Rentals.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromForm] EntregadorCreateDto dto)
+        public async Task<IActionResult> Create([FromForm] RiderCreateDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -43,7 +43,7 @@ namespace Mottu.Rentals.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromForm] EntregadorUpdateDto dto)
+        public async Task<IActionResult> Update(int id, [FromForm] RiderUpdateDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
