@@ -1,6 +1,5 @@
 ﻿namespace Mottu.Rentals.Api.Events
 {
-{
     public class MotoCadastradaEvent
     {
         public Guid Id { get; set; }

@@ -16,7 +16,6 @@
 		<Folder Include="Configurations\" />
 		<Folder Include="Logs\" />
 		<Folder Include="Repositories\" />
-		<Folder Include="Services\" />
 		<Folder Include="Utils\" />
 	</ItemGroup>
 
